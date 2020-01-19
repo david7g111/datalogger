@@ -18,18 +18,21 @@ OneWire ourWire(onewirePin);                //Se establece el pin declarado como
 DallasTemperature sensors(&ourWire); 
 
 DeviceAddress address[] = {
-  {0x28, 0xFF, 0x8C, 0x24, 0x20, 0x17, 0x03, 0x28},
+  {0x28, 0xFF, 0x84, 0x61, 0x04, 0x15, 0x03, 0xEC}, //1
+  {0x28, 0xFF, 0x8C, 0x24, 0x20, 0x17, 0x03, 0x28},//2
+  {0x28, 0xFF, 0xBD, 0x04, 0x05, 0x15, 0x03, 0x21},//3
+  {0x28, 0xFF, 0xE1, 0x2D, 0x15, 0x15, 0x01, 0x80},//4
+  {0x28, 0xFF, 0xD7, 0xE0, 0x64, 0x15, 0x02, 0x9A},//5
+  
+  {0x28, 0xFF, 0x3B, 0xDE, 0x02, 0x15, 0x02, 0x48},//2 changed
   {0x28, 0xDE, 0x86, 0x2C, 0x06, 0x00, 0x00, 0x2D},
-  {0x28, 0xDD, 0x03, 0x2C, 0x06, 0x00, 0x00, 0x6D},
-  {0x28, 0x6B, 0xE3, 0x2A, 0x06, 0x00, 0x00, 0x0B},
-  {0x28, 0x86, 0x67, 0x2C, 0x06, 0x00, 0x00, 0xB5},
-  {0x28, 0x82, 0xB1, 0x2B, 0x06, 0x00, 0x00, 0x2D},
-  {0x28, 0x73, 0xA0, 0x2C, 0x06, 0x00, 0x00, 0x5F},
-  {0x28, 0xAD, 0x76, 0x2A, 0x06, 0x00, 0x00, 0x43},
-  {0x28, 0xEA, 0xEF, 0x2A, 0x06, 0x00, 0x00, 0xF7},
   {0x28, 0x73, 0x3B, 0x2B, 0x06, 0x00, 0x00, 0x1E}
 };
-
+// 0x28, 0xFF, 0x84, 0x61, 0x04, 0x15, 0x03, 
+// 0x28, 0xFF, 0x8C, 0x24, 0x20, 0x17, 0x03, 
+// 0x28, 0xFF, 0xE1, 0x2D, 0x15, 0x15, 0x01, 
+// 0x28, 0xFF, 0xBD, 0x04, 0x05, 0x15, 0x03, 
+// 0x28, 0xFF, 0xD7, 0xE0, 0x64, 0x15, 0x02, 
 
  
 // inicializando RTC DS3231
@@ -38,21 +41,24 @@ DateTime   now;
 
 const int chipSelect = 10;  //cs de la terjeta SD
 File dataLog;
-
+int LEDrun=3; // indicador Led
 
 String a2digitos(int num);
 String filename;
 void setup()
 {
 
- 
+  pinMode(LEDrun, OUTPUT);
   rtc.begin();          // initialize RTC chip
   //rtc.adjust(DateTime(2000 + year, month, day, hour, minute, 0)); is uno quiere actualizar la hora
+ //delay(10);
+// rtc.adjust(DateTime(2020, 1, 19, 16, 21, 0));
 
   // open serial communications and wait for port to open:
   Serial.begin(9600);
   Serial.print("Buscando SD ...");
- 
+
+  digitalWrite(LEDrun,HIGH);
   // initialize the SD card
    if (!SD.begin(chipSelect)) {
     Serial.println("ERROR DE SD ");
@@ -65,7 +71,7 @@ void setup()
     Serial.println("inicializando..");
          
     filename = a2digitos(now.day())+a2digitos(now.month())+now.year();
-    filename = filename + ".txt";
+    filename = filename + ".xls";
  
     Serial.println(filename);
     
@@ -82,8 +88,13 @@ void setup()
         dataLog.println("    Fecha    |    Tiempo  | Temperatura");
         dataLog.close();   // close the file
       }
-      else
+      else{
         Serial.println("ERROR creando archivo");
+          digitalWrite(LEDrun,LOW);
+        }
+        
+        Serial.println("OK");       // poner un indicador led si es posible
+      
     }
   }
   //////// END SD card setup
@@ -118,18 +129,19 @@ if(controlador != now.minute()){
             dataLog.print("; ");  
                        
             sensors.requestTemperatures(); // Command all devices on bus to read temperature 
-            for(i=0;i<=6;i++){
-              Serial.println(sensors.getTempC(address[i]));
+            for(i=0;i<5;i++){
+              Serial.print(sensors.getTempC(address[i]));
+              Serial.print("  -  ");  
               dataLog.print(sensors.getTempC(address[i]));
               delay(10);
               dataLog.print("; ");  
               }
-           
+            Serial.println();
             dataLog.close(); 
  
 }
  
-delay(1000); 
+delay(5000); 
 
 } // end main loop
 

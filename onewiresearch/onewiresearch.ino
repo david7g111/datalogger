@@ -16,9 +16,9 @@ void getDeviceAddress(void) {
   addr array we declared above*/
   
   while(ds.search(addr)) {
-    Serial.print("The address is:\t");
+    Serial.print("\n The address is:\t");
     //read each byte in the address array
-    for( i = 0; i < 8; i++) {
+    for( i = 0; i < 7; i++) {
       Serial.print("0x");
       if (addr[i] < 16) {
         Serial.print('0');
