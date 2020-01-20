@@ -28,11 +28,6 @@ DeviceAddress address[] = {
   {0x28, 0xDE, 0x86, 0x2C, 0x06, 0x00, 0x00, 0x2D},
   {0x28, 0x73, 0x3B, 0x2B, 0x06, 0x00, 0x00, 0x1E}
 };
-// 0x28, 0xFF, 0x84, 0x61, 0x04, 0x15, 0x03, 
-// 0x28, 0xFF, 0x8C, 0x24, 0x20, 0x17, 0x03, 
-// 0x28, 0xFF, 0xE1, 0x2D, 0x15, 0x15, 0x01, 
-// 0x28, 0xFF, 0xBD, 0x04, 0x05, 0x15, 0x03, 
-// 0x28, 0xFF, 0xD7, 0xE0, 0x64, 0x15, 0x02, 
 
  
 // inicializando RTC DS3231
@@ -102,7 +97,7 @@ while (!SD.begin(chipSelect)) {
       if(dataLog) {                 // escribiendo cabecera           
         Serial.println("OK");       // poner un indicador led si es posible
      
-        dataLog.println("  Fecha ; Hora ; Temp1 ; Temp2 ; Temp3 ; Temp4 ; Temp5");
+        dataLog.print("  Fecha ; Hora ; Temp1 ; Temp2 ; Temp3 ; Temp4 ; Temp5 \n");
         dataLog.close();   // close the file
       }
       else{
@@ -123,6 +118,7 @@ while (!SD.begin(chipSelect)) {
 // main loop
 int controlador;
 int i;
+bool firstTime=true;
 void loop()
 {
 
@@ -131,7 +127,7 @@ if(controlador != now.minute()){
    controlador = now.minute();
             dataLog=SD.open(filename,FILE_WRITE);  // Print date and time    
             
-            dataLog.println();
+           
             dataLog.print(now.day(), DEC);
             dataLog.print("/");
             dataLog.print(now.month(), DEC);
@@ -146,16 +142,28 @@ if(controlador != now.minute()){
             dataLog.print("; ");  
                        
             sensors.requestTemperatures(); // Command all devices on bus to read temperature 
-            for(i=0;i<5;i++){
-              Serial.print(sensors.getTempC(address[i]));
-              Serial.print("  -  ");  
-              dataLog.print(sensors.getTempC(address[i]));
-              delay(10);
-              dataLog.print("; ");  
-              }
-            Serial.println();
-            dataLog.close(); 
- 
+            
+            if (firstTime==true){ //tiene como obejtivo eliminar los primeros valores que por lo general son erroneos
+                firstTime=false;
+                for(i=0;i<5;i++){
+                  Serial.print(sensors.getTempC(address[i]));
+                  Serial.print("  -  ");  
+                  delay(10);
+                  }
+             
+               }
+            else{
+                for(i=0;i<5;i++){
+                  Serial.print(sensors.getTempC(address[i]));
+                  Serial.print("  -  ");  
+                  dataLog.print(sensors.getTempC(address[i]));
+                  delay(10);
+                  dataLog.print("; ");  
+                  }
+                Serial.println();
+                dataLog.print('\n');
+                dataLog.close(); 
+            }
 }
  
 delay(5000); 
