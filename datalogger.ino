@@ -60,13 +60,29 @@ void setup()
 
   digitalWrite(LEDrun,HIGH);
   // initialize the SD card
-   if (!SD.begin(chipSelect)) {
-    Serial.println("ERROR DE SD ");
+
+while (!SD.begin(chipSelect)) {
+   Serial.println("ERROR DE SD ");
     // don't do anything more:
-    while (1);
-  }
-  else {   // initialization OK
-     now = rtc.now(); // leendo el tiempo con el fin de 
+     digitalWrite(LEDrun,!digitalRead(LEDrun));
+     delay(100);
+
+}
+
+
+//   if (!SD.begin(chipSelect)) {
+//    Serial.println("ERROR DE SD ");
+//    // don't do anything more:
+//     digitalWrite(LEDrun,LOW);
+//     delay(1000);
+//     digitalWrite(LEDrun,HIGH);
+//     delay(1000);
+//    while (1);
+//  }
+
+  
+//  else {   // initialization OK
+    now = rtc.now(); // leendo el tiempo con el fin de 
     
     Serial.println("inicializando..");
          
@@ -82,10 +98,11 @@ void setup()
       Serial.println(" file");
       
       dataLog = SD.open(filename, FILE_WRITE);   // abrir archivo 
-     
+      digitalWrite(LEDrun,HIGH);
       if(dataLog) {                 // escribiendo cabecera           
         Serial.println("OK");       // poner un indicador led si es posible
-        dataLog.println("    Fecha    |    Tiempo  | Temperatura");
+     
+        dataLog.println("  Fecha ; Hora ; Temp1 ; Temp2 ; Temp3 ; Temp4 ; Temp5");
         dataLog.close();   // close the file
       }
       else{
@@ -96,7 +113,7 @@ void setup()
         Serial.println("OK");       // poner un indicador led si es posible
       
     }
-  }
+ // }
   //////// END SD card setup
   
  
@@ -120,7 +137,7 @@ if(controlador != now.minute()){
             dataLog.print(now.month(), DEC);
             dataLog.print("/");
             dataLog.print(now.year(), DEC);
-            dataLog.print(" ");
+            dataLog.print("; ");
             dataLog.print(now.hour(), DEC);
             dataLog.print(":");
             dataLog.print(now.minute(), DEC);
