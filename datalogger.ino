@@ -119,15 +119,55 @@ while (!SD.begin(chipSelect)) {
 int controlador;
 int i;
 bool firstTime=true;
+//String tempDate,tempTime;
+float temp1;
 void loop()
+
 {
 
+
 now = rtc.now();  // read current time and date from the RTC chip
+delay(100);
+            Serial.println("Xx");
+            Serial.print(now.day(), DEC);
+            Serial.print("/");
+            Serial.print(now.month(), DEC);
+            Serial.print("/");
+            Serial.print(now.year(), DEC);
+            Serial.print('\n');
+            Serial.print(now.hour(), DEC);
+            Serial.print(":");
+            Serial.print(now.minute(), DEC);
+            Serial.print(":");
+            Serial.print(now.second(), DEC);
+            Serial.print('\n');  
+
+            sensors.requestTemperatures(); // Command all devices on bus to read temperature 
+            
+            if (firstTime==true){ //tiene como obejtivo eliminar los primeros valores que por lo general son erroneos
+                firstTime=false;
+                for(i=0;i<5;i++){
+                  temp1=sensors.getTempC(address[i]);
+                  delay(10);
+                  }
+             
+               }
+            else{
+                for(i=0;i<5;i++){
+                  Serial.print(sensors.getTempC(address[i]));
+                  Serial.print('\n');  
+                  delay(10);
+                 
+                  }
+                Serial.println();
+                 }
+
+
 if(controlador != now.minute()){
    controlador = now.minute();
             dataLog=SD.open(filename,FILE_WRITE);  // Print date and time    
             
-           
+            
             dataLog.print(now.day(), DEC);
             dataLog.print("/");
             dataLog.print(now.month(), DEC);
@@ -140,33 +180,53 @@ if(controlador != now.minute()){
             dataLog.print(":");
             dataLog.print(now.second(), DEC);
             dataLog.print("; ");  
+            
+//            Serial.println("Xx");
+//            Serial.print(now.day(), DEC);
+//            Serial.print("/");
+//            Serial.print(now.month(), DEC);
+//            Serial.print("/");
+//            Serial.print(now.year(), DEC);
+//            Serial.print('\n');
+//            Serial.print(now.hour(), DEC);
+//            Serial.print(":");
+//            Serial.print(now.minute(), DEC);
+//            Serial.print(":");
+//            Serial.print(now.second(), DEC);
+//            Serial.print('\n');  
+
                        
             sensors.requestTemperatures(); // Command all devices on bus to read temperature 
             
             if (firstTime==true){ //tiene como obejtivo eliminar los primeros valores que por lo general son erroneos
                 firstTime=false;
                 for(i=0;i<5;i++){
-                  Serial.print(sensors.getTempC(address[i]));
-                  Serial.print("  -  ");  
+                  temp1=sensors.getTempC(address[i]);
+//                  Serial.print(sensors.getTempC(address[i]));
+//                  Serial.print('\n');  
                   delay(10);
                   }
              
                }
             else{
                 for(i=0;i<5;i++){
-                  Serial.print(sensors.getTempC(address[i]));
-                  Serial.print("  -  ");  
+                 // Serial.print(sensors.getTempC(address[i]));
+                 // Serial.print('\n');  
                   dataLog.print(sensors.getTempC(address[i]));
                   delay(10);
                   dataLog.print("; ");  
                   }
-                Serial.println();
+               // Serial.println();
                 dataLog.print('\n');
                 dataLog.close(); 
             }
-}
+    }
+
+
+
+
  
-delay(5000); 
+delay(500); 
 
 } // end main loop
 
